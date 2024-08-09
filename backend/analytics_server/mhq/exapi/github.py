@@ -42,7 +42,7 @@ class GithubApiService:
         """
         url = f"{self.base_url}/user"
         try:
-            response = requests.get(url, headers=self.headers)
+            response = requests.get(url, headers=self.headers, timeout=60)
         except GithubException as e:
             raise Exception(f"Error in PAT validation, Error: {e.data}")
         return response.status_code == 200
@@ -148,8 +148,8 @@ class GithubApiService:
             github_url = f"{self.base_url}/repos/{org_login}/{repo_name}/contributors"
             query_params = dict(per_page=PAGE_SIZE, page=page)
             response = requests.get(
-                github_url, headers=self.headers, params=query_params
-            )
+                github_url, headers=self.headers, params=query_params, 
+            timeout=60)
             assert response.status_code == HTTPStatus.OK
             return response.json()
 
@@ -200,8 +200,8 @@ class GithubApiService:
             github_url = f"{self.base_url}/orgs/{org_login}/members"
             query_params = dict(per_page=PAGE_SIZE, page=page)
             response = requests.get(
-                github_url, headers=self.headers, params=query_params
-            )
+                github_url, headers=self.headers, params=query_params, 
+            timeout=60)
             assert response.status_code == HTTPStatus.OK
             return response.json()
 
@@ -242,8 +242,8 @@ class GithubApiService:
                 created=f"created:>={bookmark.isoformat()}",
             )
             response = requests.get(
-                github_url, headers=self.headers, params=query_params
-            )
+                github_url, headers=self.headers, params=query_params, 
+            timeout=60)
 
             if response.status_code == HTTPStatus.NOT_FOUND:
                 LOG.error(
