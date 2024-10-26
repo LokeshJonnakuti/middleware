@@ -1,4 +1,3 @@
-from random import randint
 from uuid import uuid4
 from mhq.service.deployments.models.models import (
     Deployment,
@@ -18,6 +17,7 @@ from mhq.store.models.code import (
     RepoWorkflowRunsStatus,
 )
 from mhq.utils.time import time_now
+import secrets
 
 
 def get_pull_request(
@@ -49,7 +49,7 @@ def get_pull_request(
     return PullRequest(
         id=id or uuid4(),
         repo_id=repo_id or uuid4(),
-        number=number or randint(10, 100),
+        number=number or secrets.SystemRandom().randint(10, 100),
         author=author or "randomuser",
         title=title or "title",
         state=state or PullRequestState.OPEN,
@@ -101,7 +101,7 @@ def get_pull_request_event(
             else data
         ),
         created_at=created_at or time_now(),
-        idempotency_key=idempotency_key or str(randint(10, 100)),
+        idempotency_key=idempotency_key or str(secrets.SystemRandom().randint(10, 100)),
         org_repo_id=org_repo_id or uuid4(),
         actor_username=reviewer or "randomuser",
     )
