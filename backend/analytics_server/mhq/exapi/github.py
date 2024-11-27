@@ -2,8 +2,6 @@ import contextlib
 from datetime import datetime
 from http import HTTPStatus
 from typing import Optional, Dict, Tuple, List
-
-import requests
 from github import Github, UnknownObjectException
 from github.GithubException import GithubException
 from github.Organization import Organization as GithubOrganization
@@ -13,6 +11,7 @@ from github.Repository import Repository as GithubRepository
 
 from mhq.exapi.models.github import GitHubContributor
 from mhq.utils.log import LOG
+from security import safe_requests
 
 PAGE_SIZE = 100
 
@@ -42,7 +41,7 @@ class GithubApiService:
         """
         url = f"{self.base_url}/user"
         try:
-            response = requests.get(url, headers=self.headers)
+            response = safe_requests.get(url, headers=self.headers)
         except GithubException as e:
             raise Exception(f"Error in PAT validation, Error: {e.data}")
         return response.status_code == 200
@@ -147,7 +146,7 @@ class GithubApiService:
         def _fetch_contributors(page: int = 0):
             github_url = f"{self.base_url}/repos/{org_login}/{repo_name}/contributors"
             query_params = dict(per_page=PAGE_SIZE, page=page)
-            response = requests.get(
+            response = safe_requests.get(
                 github_url, headers=self.headers, params=query_params
             )
             assert response.status_code == HTTPStatus.OK
@@ -199,7 +198,7 @@ class GithubApiService:
         def _fetch_members(page: int = 0):
             github_url = f"{self.base_url}/orgs/{org_login}/members"
             query_params = dict(per_page=PAGE_SIZE, page=page)
-            response = requests.get(
+            response = safe_requests.get(
                 github_url, headers=self.headers, params=query_params
             )
             assert response.status_code == HTTPStatus.OK
@@ -241,7 +240,7 @@ class GithubApiService:
                 page=page,
                 created=f"created:>={bookmark.isoformat()}",
             )
-            response = requests.get(
+            response = safe_requests.get(
                 github_url, headers=self.headers, params=query_params
             )
 

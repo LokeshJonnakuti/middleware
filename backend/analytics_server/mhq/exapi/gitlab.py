@@ -1,11 +1,11 @@
 from collections.abc import Awaitable
 from typing import Dict, List
-import requests
 from datetime import datetime
 from requests.exceptions import HTTPError
 import aiohttp
 
 from mhq.exapi.models.gitlab import GitlabCommit, GitlabNote, GitlabRepo, GitlabUser
+from security import safe_requests
 
 
 class GithubRateLimitExceeded(Exception):
@@ -26,7 +26,7 @@ class GitlabApiService:
         """
         url = f"{self.base_url}/user"
         try:
-            response = requests.get(url, headers=self.headers)
+            response = safe_requests.get(url, headers=self.headers)
         except Exception as e:
             raise Exception(f"Error in PAT validation, Error: {e.data}")
 
@@ -42,7 +42,7 @@ class GitlabApiService:
 
     def get_authenticated_user(self) -> GitlabUser:
         url = f"{self.base_url}/user"
-        response = requests.get(url, headers=self.headers)
+        response = safe_requests.get(url, headers=self.headers)
         self._handle_error(response)
         user = response.json()
         return GitlabUser(user)
@@ -57,14 +57,14 @@ class GitlabApiService:
             "order_by": "updated_at",
             "sort": "desc",
         }
-        response = requests.get(url, headers=self.headers, params=params)
+        response = safe_requests.get(url, headers=self.headers, params=params)
         self._handle_error(response)
         projects = response.json()
         return list(map(GitlabRepo, projects))
 
     def get_groups(self) -> List[Dict]:
         url = f"{self.base_url}/groups"
-        response = requests.get(url, headers=self.headers)
+        response = safe_requests.get(url, headers=self.headers)
         self._handle_error(response)
         groups = response.json()
         return groups
@@ -74,42 +74,42 @@ class GitlabApiService:
     ) -> List[GitlabRepo]:
         url = f"{self.base_url}/groups/{group_id}/projects"
         params = {"page": page, "per_page": page_size}
-        response = requests.get(url, headers=self.headers, params=params)
+        response = safe_requests.get(url, headers=self.headers, params=params)
         self._handle_error(response)
         projects = response.json()
         return list(map(GitlabRepo, projects))
 
     def get_group_members(self, group_id) -> List[GitlabUser]:
         url = f"{self.base_url}/groups/{group_id}/members/all"
-        response = requests.get(url, headers=self.headers)
+        response = safe_requests.get(url, headers=self.headers)
         self._handle_error(response)
         members = response.json()
         return list(map(GitlabUser, members))
 
     def get_project(self, project_id) -> GitlabRepo:
         url = f"{self.base_url}/projects/{project_id}"
-        response = requests.get(url, headers=self.headers)
+        response = safe_requests.get(url, headers=self.headers)
         self._handle_error(response)
         project = response.json()
         return GitlabRepo(project)
 
     def get_project_users(self, project_id) -> List[GitlabUser]:
         url = f"{self.base_url}/projects/{project_id}/users"
-        response = requests.get(url, headers=self.headers)
+        response = safe_requests.get(url, headers=self.headers)
         self._handle_error(response)
         users = response.json()
         return list(map(GitlabUser, users))
 
     def get_project_languages(self, project_id) -> Dict[str, float]:
         url = f"{self.base_url}/projects/{project_id}/languages"
-        response = requests.get(url, headers=self.headers)
+        response = safe_requests.get(url, headers=self.headers)
         self._handle_error(response)
         language_map = response.json()
         return language_map
 
     def get_project_contributors(self, project_id):
         url = f"{self.base_url}/projects/{project_id}/repository/contributors"
-        response = requests.get(url, headers=self.headers)
+        response = safe_requests.get(url, headers=self.headers)
         self._handle_error(response)
         contributors = response.json()
         return contributors
@@ -142,7 +142,7 @@ class GitlabApiService:
         self, project_id, merge_request_internal_id
     ) -> List[GitlabCommit]:
         url = f"{self.base_url}/projects/{project_id}/merge_requests/{merge_request_internal_id}/commits"
-        response = requests.get(url, headers=self.headers)
+        response = safe_requests.get(url, headers=self.headers)
         self._handle_error(response)
         commits = response.json()
         return list(map(GitlabCommit, commits))
@@ -151,7 +151,7 @@ class GitlabApiService:
         self, project_id, merge_request_internal_id
     ) -> List[GitlabNote]:
         url = f"{self.base_url}/projects/{project_id}/merge_requests/{merge_request_internal_id}/notes"
-        response = requests.get(url, headers=self.headers)
+        response = safe_requests.get(url, headers=self.headers)
         self._handle_error(response)
         notes = response.json()
         return list(map(GitlabNote, notes))
@@ -160,7 +160,7 @@ class GitlabApiService:
         self, project_id, merge_request_internal_id
     ) -> List[Dict]:
         url = f"{self.base_url}/projects/{project_id}/merge_requests/{merge_request_internal_id}/diffs"
-        response = requests.get(url, headers=self.headers)
+        response = safe_requests.get(url, headers=self.headers)
         self._handle_error(response)
         diff = response.json()
         return diff
